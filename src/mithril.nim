@@ -51,6 +51,14 @@ template eventHandler*(body: untyped): EventHandler {.dirty.} =
       body
   )
 
+template lifecycleHook*(name, body: untyped): LifecycleHook {.dirty.} =
+  (
+    proc(vnode: JsObject) {.async.} =
+      var state = vnode.state.to(name)
+      body
+  )
+
+
 template lifecycleHook*(body: untyped): LifecycleHook {.dirty.} =
   (
     proc(vnode: JsObject) {.async.} =

@@ -15,6 +15,7 @@ type ViewProc* = proc(vnode: JsObject): VNode
 type LifecycleHook* = proc(vnode: JsObject): Future[void]
 type BeforeUpdateHook* = proc(vnode, old: JsObject): bool
 type EventHandler* = proc(e: JsObject)
+type AsyncEventHandler* = proc(e: JsObject): Future[void]
 
 proc toJsAssoc*(props: openarray[(cstring | string, JsObject)]): Attributes =
   result = newJsAssoc[cstring, JsObject]()
@@ -35,7 +36,14 @@ template viewFn*(name, body: untyped): ViewProc {.dirty.} =
       var state = vnode.state.to(name)
       body
   )
-    
+
+template viewFn*(body: untyped): ViewProc{.dirty.} =
+  (
+    proc (vnode: JsObject): VNode =
+      var state = vnode.state
+      body
+  )
+
 template converters*(name: untyped): untyped =
   converter toSelector*(self: name): MithrilSelector =
     let jsObj = self.toJs
@@ -50,6 +58,13 @@ template eventHandler*(body: untyped): EventHandler {.dirty.} =
     proc(e: JsObject) =
       body
   )
+
+template eventHandlerAsync*(body: untyped): AsyncEventHandler {.dirty.} =
+  (
+    proc(e: JsObject) {.async.}=
+      body
+  )
+
 
 template lifecycleHook*(name, body: untyped): LifecycleHook {.dirty.} =
   (

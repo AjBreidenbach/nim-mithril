@@ -164,6 +164,7 @@ proc mrequest*(url: string | cstring, `method`:  string | cstring = "", body: Js
   if params != nil: options.params = toJs params
   if user.len != 0: options.user = cstring user
   if password.len != 0: options.password = cstring password
+  if background: options.background = background
   options.withCredentials = withCredentials
 
   if timeout != -1: options.timeout = timeout
